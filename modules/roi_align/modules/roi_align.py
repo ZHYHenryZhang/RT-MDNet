@@ -1,9 +1,23 @@
 from torch.nn.modules.module import Module
+from torch.autograd import Function
 from torch.nn.functional import avg_pool2d, max_pool2d
-from ..functions.roi_align import RoIAlignFunction, RoIAlignAdaFunction, RoIAlignDenseAdaFunction
+# from ..functions.roi_align import RoIAlignFunction, RoIAlignAdaFunction, RoIAlignDenseAdaFunction
 
+from torchvision.ops import RoIAlign as RoIAlignTV
 import torch
 
+
+class RoIAlignFunction(Function):
+    def __init__(self, aligned_height, aligned_width, spatial_scale):
+        self.aligned_width = int(aligned_width)
+        self.aligned_height = int(aligned_height)
+        self.spatial_scale = float(spatial_scale)
+        self.rois = None
+        self.feature_size = None
+        self.function = RoIAlignTV((self.aligned_width, self.aligned_height), self.spatial_scale, -1)
+
+    def forward(self, features, rois):
+        return self.function(features, rois)
 
 class RoIAlign(Module):
     def __init__(self, aligned_height, aligned_width, spatial_scale):

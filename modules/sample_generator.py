@@ -4,7 +4,7 @@ from PIL import Image
 from utils import *
 
 def gen_samples(generator, bbox, n, overlap_range=None, scale_range=None):
-
+    n = int(n)
     if overlap_range is None and scale_range is None:
         return generator(bbox, n)
 

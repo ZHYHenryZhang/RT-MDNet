@@ -1,3 +1,4 @@
+from __future__ import absolute_import, division, print_function, unicode_literals
 import sys
 sys.path.insert(0,'./modules')
 from roi_align.modules.roi_align import RoIAlign
@@ -18,7 +19,7 @@ class imgCropper(nn.Module):
         self.isCuda = False
         self.img_size = img_size
         self.roi_align_model = RoIAlign(img_size,img_size, 1. )
-
+        
     def gpuEnable(self):
         self.roi_align_model = self.roi_align_model.cuda()
         self.isCuda = True
@@ -61,7 +62,7 @@ class imgCropper(nn.Module):
         start_time = time.time()
         cur_images = torch.squeeze(torch.stack(img_list, 0))
         torch.cuda.synchronize()
-        print '10 image stacking time:{}'.format(time.time() - start_time)
+        print( '10 image stacking time:{}'.format(time.time() - start_time))
 
         ishape = cur_images.size()
 

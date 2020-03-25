@@ -3,4 +3,5 @@ models/
 *.npy
 *.tar
 *.pkl
+*.pyc
 

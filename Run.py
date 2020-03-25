@@ -61,10 +61,9 @@ def genConfig(seq_path, set_type):
 
     return img_list, gt
 
-
-if __name__ == "__main__":
-
+def get_config():
     parser = argparse.ArgumentParser()
+    parser.add_argument("-mode", default='run')
     parser.add_argument("-set_type", default = 'OTB' )
     parser.add_argument("-model_path", default = './models/rt-mdnet.pth')
     parser.add_argument("-result_path", default = './result.npy')
@@ -93,12 +92,12 @@ if __name__ == "__main__":
     ############################Do not modify opts anymore.###########################
     ######################Becuase of synchronization of options#######################
     ##################################################################################
-    print opts
+    print(opts)
+    return args, opts
 
-
+def run(args, opts):
     ## path initialization
-    dataset_path = '/home/ilchae/dataset/tracking/'
-
+    dataset_path = '/media/henry/Files/datasets/'
 
     seq_home = dataset_path + opts['set_type']
     seq_list = [f for f in os.listdir(seq_home) if isdir(join(seq_home,f))]
@@ -131,10 +130,53 @@ if __name__ == "__main__":
         fps_list[seq]=fps
 
         bb_result_nobb[seq] = result_nobb
-        print '{} {} : {} , total mIoU:{}, fps:{}'.format(num,seq,iou_result.mean(), sum(iou_list)/len(iou_list),sum(fps_list.values())/len(fps_list))
+        print('{} {} : {} , total mIoU:{}, fps:{}'.format(num,seq,iou_result.mean(), sum(iou_list)/len(iou_list),sum(fps_list.values())/len(fps_list)))
 
     result['bb_result']=bb_result
     result['fps']=fps_list
     result['bb_result_nobb']=bb_result_nobb
-    np.save(opts['result_path'],result)
+    with open(opts['result_path'], 'wb') as fp:
+        pickle.dump(result, fp)
+    # np.save(opts['result_path'],result)
 
+
+def visualize(args, opts):
+    import cv2
+    ## path initialization
+    dataset_path = '/media/henry/Files/datasets/'
+
+    seq_home = dataset_path + opts['set_type']
+    seq_list = [f for f in os.listdir(seq_home) if isdir(join(seq_home,f))]
+
+    iou_list=[]
+    fps_list=dict()
+    bb_result = dict()
+    result = dict()
+
+    iou_list_nobb=[]
+    bb_result_nobb = dict()
+    for num,seq in enumerate(seq_list):
+        if num<-1:
+            continue
+        seq_path = seq_home + '/' + seq
+        img_list,gt=genConfig(seq_path,opts['set_type'])
+        # pred_res = np.load('./result.npy')
+        with open('./result.npy', 'rb') as fp:
+            result = pickle.load(fp)
+        result_bbox = result['bb_result']['Basketball']
+        for i in range(gt.shape[0]):
+            img = cv2.imread(img_list[i])
+            x, y, dx, dy = gt[i]
+            img = cv2.rectangle(img, (int(x), int(y)), (int(x+dx), int(y+dy)), (255, 255, 255), 2)
+            x, y, dx, dy = result_bbox[i]
+            img = cv2.rectangle(img, (int(x), int(y)), (int(x+dx), int(y+dy)), (255, 0, 0), 2) 
+            cv2.imshow('display', img)
+            cv2.waitKey(10)
+
+if __name__ == "__main__":
+    args, opts = get_config()
+    if args.mode == 'run':
+        run(args, opts)
+        visualize(args, opts)
+    else:
+        visualize(args, opts)

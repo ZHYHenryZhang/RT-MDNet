@@ -16,8 +16,8 @@ from data_prov import *
 from model import *
 from bbreg import *
 from options import *
-from img_cropper import *
-from roi_align.modules.roi_align import RoIAlignAvg,RoIAlignMax,RoIAlignAdaMax,RoIAlignDenseAdaMax
+# from img_cropper import *
+# from roi_align.modules.roi_align import RoIAlignAvg,RoIAlignMax,RoIAlignAdaMax,RoIAlignDenseAdaMax
 
 #np.random.seed(123)
 #torch.manual_seed(456)
@@ -32,9 +32,9 @@ from roi_align.modules.roi_align import RoIAlignAvg,RoIAlignMax,RoIAlignAdaMax,R
 def set_optimizer(model, lr_base, lr_mult=opts['lr_mult'], momentum=opts['momentum'], w_decay=opts['w_decay']):
     params = model.get_learnable_params()
     param_list = []
-    for k, p in params.iteritems():
+    for k, p in params.items():
         lr = lr_base
-        for l, m in lr_mult.iteritems():
+        for l, m in lr_mult.items():
             if k.startswith(l):
                 lr = lr_base * m
         param_list.append({'params': [p], 'lr':lr})
@@ -105,7 +105,7 @@ def train(model, criterion, optimizer, pos_feats, neg_feats, maxiter, in_layer='
         optimizer.step()
 
         if opts['visual_log']:
-            print "Iter %d, Loss %.4f" % (iter, loss.data[0])
+            print( "Iter %d, Loss %.4f" % (iter, loss.data[0]))
 
 
 
@@ -133,7 +133,8 @@ def run_mdnet(img_list, init_bbox, gt=None, seq='seq_name ex)Basketball', savefi
         align_h = model.roi_align_model.aligned_height
         align_w = model.roi_align_model.aligned_width
         spatial_s = model.roi_align_model.spatial_scale
-        model.roi_align_model = RoIAlignAdaMax(align_h, align_w, spatial_s)
+        # model.roi_align_model = RoIAlignAdaMax(align_h, align_w, spatial_s)
+        model.roi_align_model = RoIAlignMax(align_h, align_w, spatial_s)
     if opts['use_gpu']:
         model = model.cuda()
 
@@ -631,11 +632,11 @@ def run_mdnet(img_list, init_bbox, gt=None, seq='seq_name ex)Basketball', savefi
 
         if opts['visual_log']:
             if gt is None:
-                print "Frame %d/%d, Score %.3f, Time %.3f" % \
-                    (i, len(img_list), target_score, spf)
+                print( "Frame %d/%d, Score %.3f, Time %.3f" % \
+                    (i, len(img_list), target_score, spf))
             else:
-                print "Frame %d/%d, Overlap %.3f, Score %.3f, Time %.3f" % \
-                    (i, len(img_list), overlap_ratio(gt[i],result_bb[i])[0], target_score, spf)
+                print( "Frame %d/%d, Overlap %.3f, Score %.3f, Time %.3f" % \
+                    (i, len(img_list), overlap_ratio(gt[i],result_bb[i])[0], target_score, spf))
         iou_result[i]= overlap_ratio(gt[i],result_bb[i])[0]
 
 

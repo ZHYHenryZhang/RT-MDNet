@@ -1,3 +1,4 @@
+from __future__ import absolute_import, division, print_function, unicode_literals
 import os
 import scipy.io
 import numpy as np
@@ -16,7 +17,7 @@ from roi_align.modules.roi_align import RoIAlignAvg,RoIAlignMax
 
 def append_params(params, module, prefix):
     for child in module.children():
-        for k,p in child._parameters.iteritems():
+        for k,p in child._parameters.items():
             if p is None: continue
 
             if isinstance(child, nn.BatchNorm2d):
@@ -86,7 +87,7 @@ class MDNet(nn.Module):
                                                      nn.Linear(512, 2)) for _ in range(K)])
 
         self.roi_align_model = RoIAlignMax(3, 3, 1. / 8)
-
+        
         self.receptive_field = 75.  # it is receptive fieald that a element of feat_map covers. feat_map is bottom layer of ROI_align_layer
 
         if model_path is not None:
@@ -106,7 +107,7 @@ class MDNet(nn.Module):
             append_params(self.params, module, 'fc6_%d'%(k))
 
     def set_learnable_params(self, layers):
-        for k, p in self.params.iteritems():
+        for k, p in self.params.items():
             if any([k.startswith(l) for l in layers]):
                 p.requires_grad = True
             else:
@@ -115,7 +116,7 @@ class MDNet(nn.Module):
 
     def get_learnable_params(self):
         params = OrderedDict()
-        for k, p in self.params.iteritems():
+        for k, p in self.params.items():
             if p.requires_grad:
                 params[k] = p
         return params
